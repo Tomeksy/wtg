@@ -5,29 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WTG - What The GIF</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
             background: transparent;
             display: flex;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
         }
+
         .container {
             width: 100%;
             max-width: 400px;
+            padding: 0;
+            margin: 0 auto;
         }
+
         .hidden {
             display: none !important;
         }
+
         .upload-form {
             text-align: center;
             padding: 20px;
             border-radius: 12px;
-            background: white;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            background: #2D2D2D;
         }
+
         .upload-area {
             border: 2px dashed #ccc;
             padding: 30px 20px;
@@ -35,13 +46,21 @@
             margin: 20px 0;
             cursor: pointer;
             transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
         }
+
         .upload-area:hover {
-            border-color: #666;
-            background: #f8f8f8;
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.15);
         }
+
+        .upload-area p {
+            color: #fff;
+            margin: 0;
+        }
+
         .submit-btn {
-            background: #32a852;
+            background: #00d166;
             color: white;
             border: none;
             padding: 12px 24px;
@@ -51,20 +70,23 @@
             width: 100%;
             transition: background 0.3s ease;
         }
+
         .submit-btn:disabled {
-            background: #999;
+            background: #666;
             cursor: not-allowed;
         }
+
         .loading, .success {
             text-align: center;
             padding: 20px;
-            background: white;
+            background: #2D2D2D;
             border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            color: white;
         }
+
         .download-btn {
             display: inline-block;
-            background: #32a852;
+            background: #00d166;
             color: white;
             text-decoration: none;
             padding: 12px 24px;
@@ -73,9 +95,16 @@
             box-sizing: border-box;
             text-align: center;
             transition: background 0.3s ease;
+            margin-top: 10px;
         }
+
         .submit-btn:hover, .download-btn:hover {
-            background: #2b924b;
+            background: #00b056;
+        }
+
+        h2, h3 {
+            color: white;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -130,7 +159,7 @@
         uploadArea.addEventListener('click', () => fileInput.click());
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = '#666';
+            uploadArea.style.borderColor = '#fff';
         });
         uploadArea.addEventListener('dragleave', () => {
             uploadArea.style.borderColor = '#ccc';
