@@ -3,14 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Your GIF</title>
+    <title>WTG - What The GIF</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
+            margin: 0;
             padding: 20px;
             background: transparent;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
         }
         .hidden {
             display: none !important;
@@ -18,40 +24,43 @@
         .upload-form {
             text-align: center;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 12px;
             background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
         }
         .upload-area {
             border: 2px dashed #ccc;
-            padding: 40px 20px;
+            padding: 30px 20px;
             border-radius: 8px;
             margin: 20px 0;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
         .upload-area:hover {
             border-color: #666;
+            background: #f8f8f8;
         }
         .submit-btn {
-            background: #5469d4;
+            background: #32a852;
             color: white;
             border: none;
             padding: 12px 24px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
+            width: 100%;
+            transition: background 0.3s ease;
         }
         .submit-btn:disabled {
             background: #999;
             cursor: not-allowed;
         }
-        .loading {
+        .loading, .success {
             text-align: center;
             padding: 20px;
-        }
-        .success {
-            text-align: center;
-            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
         }
         .download-btn {
             display: inline-block;
@@ -60,46 +69,53 @@
             text-decoration: none;
             padding: 12px 24px;
             border-radius: 6px;
-            margin-top: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            transition: background 0.3s ease;
+        }
+        .submit-btn:hover, .download-btn:hover {
+            background: #2b924b;
         }
     </style>
 </head>
 <body>
-    <!-- Payment Section -->
-    <div id="payment-section">
-        <script async src="https://js.stripe.com/v3/buy-button.js"></script>
-        <stripe-buy-button
-            buy-button-id="buy_btn_1QMtHcKAP2NBqnvgxEkdKM4E"
-            publishable-key="pk_live_51PUwxaKAP2NBqnvgq7KCQy9cdt7TGhyXwdlP5MD38JsAezIJUq5Z8lVmrN5Q1mBJAFtwja2hDhwy6AghKlxT8BKA00azDb7HVF"
-        >
-        </stripe-buy-button>
-    </div>
+    <div class="container">
+        <!-- Payment Section -->
+        <div id="payment-section">
+            <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+            <stripe-buy-button
+                buy-button-id="buy_btn_1QMtHcKAP2NBqnvgxEkdKM4E"
+                publishable-key="pk_live_51PUwxaKAP2NBqnvgq7KCQy9cdt7TGhyXwdlP5MD38JsAezIJUq5Z8lVmrN5Q1mBJAFtwja2hDhwy6AghKlxT8BKA00azDb7HVF"
+            >
+            </stripe-buy-button>
+        </div>
 
-    <!-- Upload Section -->
-    <div id="upload-section" class="hidden">
-        <div class="upload-form">
-            <h2>Upload Your Image</h2>
-            <div class="upload-area" id="upload-area">
-                <p>Click or drag image here</p>
-                <input type="file" id="file-input" accept="image/*" style="display: none">
+        <!-- Upload Section -->
+        <div id="upload-section" class="hidden">
+            <div class="upload-form">
+                <h2>Upload Your Image</h2>
+                <div class="upload-area" id="upload-area">
+                    <p>Click or drag image here</p>
+                    <input type="file" id="file-input" accept="image/*" style="display: none">
+                </div>
+                <button class="submit-btn" id="submit-btn" disabled>Create GIF</button>
             </div>
-            <button class="submit-btn" id="submit-btn" disabled>Create GIF</button>
+        </div>
+
+        <!-- Loading Section -->
+        <div id="loading-section" class="hidden loading">
+            <p>Creating your GIF...</p>
+        </div>
+
+        <!-- Success Section -->
+        <div id="success-section" class="hidden success">
+            <h3>Your GIF is ready!</h3>
+            <a href="#" class="download-btn" id="download-link" target="_blank">Download GIF</a>
         </div>
     </div>
 
-    <!-- Loading Section -->
-    <div id="loading-section" class="hidden loading">
-        <p>Creating your GIF...</p>
-    </div>
-
-    <!-- Success Section -->
-    <div id="success-section" class="hidden success">
-        <h3>Your GIF is ready!</h3>
-        <a href="#" class="download-btn" id="download-link" target="_blank">Download GIF</a>
-    </div>
-
     <script>
-        // Listen for Stripe success event
         window.addEventListener('message', function(ev) {
             if (ev.data.type === 'buy-button:success') {
                 document.getElementById('payment-section').classList.add('hidden');
@@ -107,7 +123,6 @@
             }
         });
 
-        // Handle file upload
         const fileInput = document.getElementById('file-input');
         const uploadArea = document.getElementById('upload-area');
         const submitBtn = document.getElementById('submit-btn');
@@ -135,28 +150,24 @@
             }
         }
 
-        // Handle form submission
         submitBtn.addEventListener('click', async () => {
             const file = fileInput.files[0];
             if (!file) return;
 
-            // Show loading state
             document.getElementById('upload-section').classList.add('hidden');
             document.getElementById('loading-section').classList.remove('hidden');
 
-            // Create FormData and send to Make.com webhook
             const formData = new FormData();
             formData.append('image', file);
 
             try {
-                const response = await fetch('YOUR_MAKE_WEBHOOK_URL', {
+                const response = await fetch('https://hook.eu2.make.com/mqp0mcaalqkrheaul8wqlhftxdabhh4p', {
                     method: 'POST',
                     body: formData
                 });
                 
                 const data = await response.json();
                 
-                // Show success state with download link
                 document.getElementById('loading-section').classList.add('hidden');
                 document.getElementById('success-section').classList.remove('hidden');
                 document.getElementById('download-link').href = data.gifUrl;
