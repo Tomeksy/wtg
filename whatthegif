@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your GIF</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: transparent;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .upload-form {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 40px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #666;
+        }
+        .submit-btn {
+            background: #5469d4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .submit-btn:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .success {
+            text-align: center;
+            padding: 20px;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #32a852;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Payment Section -->
+    <div id="payment-section">
+        <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+        <stripe-buy-button
+            buy-button-id="buy_btn_1QMtHcKAP2NBqnvgxEkdKM4E"
+            publishable-key="pk_live_51PUwxaKAP2NBqnvgq7KCQy9cdt7TGhyXwdlP5MD38JsAezIJUq5Z8lVmrN5Q1mBJAFtwja2hDhwy6AghKlxT8BKA00azDb7HVF"
+        >
+        </stripe-buy-button>
+    </div>
+
+    <!-- Upload Section -->
+    <div id="upload-section" class="hidden">
+        <div class="upload-form">
+            <h2>Upload Your Image</h2>
+            <div class="upload-area" id="upload-area">
+                <p>Click or drag image here</p>
+                <input type="file" id="file-input" accept="image/*" style="display: none">
+            </div>
+            <button class="submit-btn" id="submit-btn" disabled>Create GIF</button>
+        </div>
+    </div>
+
+    <!-- Loading Section -->
+    <div id="loading-section" class="hidden loading">
+        <p>Creating your GIF...</p>
+    </div>
+
+    <!-- Success Section -->
+    <div id="success-section" class="hidden success">
+        <h3>Your GIF is ready!</h3>
+        <a href="#" class="download-btn" id="download-link" target="_blank">Download GIF</a>
+    </div>
+
+    <script>
+        // Listen for Stripe success event
+        window.addEventListener('message', function(ev) {
+            if (ev.data.type === 'buy-button:success') {
+                document.getElementById('payment-section').classList.add('hidden');
+                document.getElementById('upload-section').classList.remove('hidden');
+            }
+        });
+
+        // Handle file upload
+        const fileInput = document.getElementById('file-input');
+        const uploadArea = document.getElementById('upload-area');
+        const submitBtn = document.getElementById('submit-btn');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#666';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#ccc';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileInput.files = e.dataTransfer.files;
+            handleFileSelect();
+        });
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect() {
+            if (fileInput.files.length > 0) {
+                uploadArea.textContent = fileInput.files[0].name;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Handle form submission
+        submitBtn.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Show loading state
+            document.getElementById('upload-section').classList.add('hidden');
+            document.getElementById('loading-section').classList.remove('hidden');
+
+            // Create FormData and send to Make.com webhook
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('YOUR_MAKE_WEBHOOK_URL', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                // Show success state with download link
+                document.getElementById('loading-section').classList.add('hidden');
+                document.getElementById('success-section').classList.remove('hidden');
+                document.getElementById('download-link').href = data.gifUrl;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Something went wrong. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
